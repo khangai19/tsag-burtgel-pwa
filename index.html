@@ -12,7 +12,6 @@
 <style>
   html, body { margin:0; height:100%; background:#0f172a; color:#f1f5f9;
                font-family:Roboto, system-ui, -apple-system, "Segoe UI", sans-serif; }
-  #app { position:fixed; inset:0; width:100%; height:100%; border:0; display:none; background:#0f172a; }
   #msg { min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
          text-align:center; padding:24px; box-sizing:border-box; gap:14px; }
   #msg img { width:96px; height:96px; border-radius:22px; }
@@ -24,7 +23,6 @@
 </style>
 </head>
 <body>
-<iframe id="app" title="Цаг бүртгэл" allow="camera; microphone; screen-wake-lock" referrerpolicy="no-referrer"></iframe>
 <div id="msg">
   <img src="icon-192.png" alt="">
   <h1>ХӨХ ТУГ ЭМИЙН САН<br>Цаг бүртгэл</h1>
@@ -71,30 +69,20 @@ window.addEventListener('appinstalled', () => {
   $('hint').style.display = 'none';
 });
 
+// Google-д нэвтэрсэн хөтөч Apps Script-ийг iframe-д харуулахгүй тул шууд шилжинэ.
+// Суулгасан апп дотор шилжсэн хуудас мөн апп-ын цонхонд нээгдэнэ.
 if (url && standalone) {
-  // Суулгасан апп: бүтэн дэлгэцээр бүртгэлийн хуудсыг нээнэ
-  $('msg').style.display = 'none';
-  $('app').style.display = 'block';
-  $('app').src = url;
+  $('text').textContent = 'Нээж байна…';
+  location.replace(url);
 } else if (url) {
   // Хөтчөөр нээсэн: эхлээд суулгуулна, хүсвэл шууд ашиглаж болно
   $('text').innerHTML = 'Холбоос хадгалагдлаа ✓<br>Одоо утсанд <b>апп болгож суулгана</b> уу.';
   $('hint').style.display = 'block';
   const go = document.createElement('p');
-  go.innerHTML = '<a href="#" style="color:#60a5fa">Суулгалгүйгээр шууд нээх</a>';
-  go.querySelector('a').onclick = ev => {
-    ev.preventDefault();
-    $('msg').style.display = 'none';
-    $('app').style.display = 'block';
-    $('app').src = url;
-  };
+  go.innerHTML = '<a style="color:#60a5fa">Суулгалгүйгээр шууд нээх</a>';
+  go.querySelector('a').href = url;
   $('msg').appendChild(go);
 }
-
-// Дэлгэц унтрахаас сэргийлнэ (iframe дотор ажилладаггүй тул бүрхүүл дээр асаана)
-async function wake() { try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {} }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
-wake();
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
